@@ -87,7 +87,8 @@ encodeHeader pc len (Start Sequence)           = ASN1Header Universal 0x10 pc le
 encodeHeader pc len (Start Set)                = ASN1Header Universal 0x11 pc len
 encodeHeader pc len (Start (Container tc tag)) = ASN1Header tc tag pc len
 encodeHeader pc len (Other tc tag _)           = ASN1Header tc tag pc len
-encodeHeader _ _ (End _)                       = error "this should not happen"
+encodeHeader pc len (End _)                    = ASN1Header Universal 0xff pc len -- random
+
 
 encodePrimitiveHeader :: ASN1Length -> ASN1 -> ASN1Header
 encodePrimitiveHeader = encodeHeader False
@@ -104,7 +105,7 @@ encodePrimitiveData (Enumerated i)      = putInteger $ fromIntegral i
 encodePrimitiveData (ASN1String cs)     = getCharacterStringRawData cs
 encodePrimitiveData (ASN1Time ty ti tz) = putTime ty ti tz
 encodePrimitiveData (Other _ _ b)       = b
-encodePrimitiveData o                   = error ("not a primitive " ++ show o)
+encodePrimitiveData o                   = encodePrimitiveData Null  --error ("not a primitive " ++ show o)
 
 encodePrimitive :: ASN1 -> (Int, [ASN1Event])
 encodePrimitive a =
